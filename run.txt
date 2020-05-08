@@ -1,0 +1,1 @@
+./cpp2c /home/karthik/OpenTimelineIO/src/opentime/rationalTime.h -- -I/home/karthik/OpenTimelineIO/src/ -I/usr/include/c++/7.5.0/ -I/usr/include/x86_64-linux-gnu/c++/7.5.0 -I/usr/lib/gcc/x86_64-linux-gnu/7/include/ -std=c++11
