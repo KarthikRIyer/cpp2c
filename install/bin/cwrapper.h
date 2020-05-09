@@ -6,11 +6,11 @@ struct      RationalTime;
 typedef     struct RationalTime RationalTime;
 
 enum IsDropFrameRate{
-    InferFromRate = -1
-    ForceNo = 0
-    ForceYes = 1
+    InferFromRate = -1,
+    ForceNo = 0,
+    ForceYes = 1,
 };
-RationalTime* RationalTime_create(double value, double rate);
+ RationalTime_create(double value, double rate);
 _Bool RationalTime_is_invalid_time(RationalTime* self);
 double RationalTime_value(RationalTime* self);
 double RationalTime_rate(RationalTime* self);
@@ -31,7 +31,7 @@ double RationalTime_to_seconds(RationalTime* self);
 const char* RationalTime_to_timecode(RationalTime* self, double rate,  drop_frame, ErrorStatus* error_status);
 const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status);
 const char* RationalTime_to_time_string(RationalTime* self);
-void RationalTime_destroy(RationalTime* self);
+ RationalTime_destroy(RationalTime* self);
 #ifdef __cplusplus
 }
 #endif

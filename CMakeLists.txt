@@ -21,7 +21,8 @@ SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
-
+#add_definitions(-DLIB_PATH=${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+#message(STATUS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 # Now build our tools
 add_executable(cpp2c cpp2c.cpp)
 

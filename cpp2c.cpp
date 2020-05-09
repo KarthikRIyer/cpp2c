@@ -85,8 +85,8 @@ public:
             }
 
         }
-        if(CType == "basic_string*") CType = "const char*";
-        if(CastType == "basic_string*") CastType = "const char*";
+//        if(CType == "basic_string*") CType = "const char*";
+//        if(CastType == "basic_string*") CastType = "const char*";
         return make_tuple(CType, CastType, isPointer, shouldReturn);
 
     }
@@ -106,8 +106,11 @@ public:
             string className = cmd->getParent()->getDeclName().getAsString();
             string returnType = "";
             string returnCast = "";
+            string returnTypeFinal = "";
+            string returnCastFinal = "";
             bool shouldReturn, isPointer;
             bool returnSelfType = false;
+            bool returnTypeString = false;
             string self = className + "* self";
             string separator = ", ";
             string bodyEnd = "";
@@ -137,11 +140,35 @@ public:
                 const QualType qt = cmd->getReturnType();
                 std::tie(returnType, returnCast, isPointer, shouldReturn) = determineCType(qt);
 //                cout<<methodName<<" "<<returnType<< " " << returnCast <<endl;
+                if(returnType == "basic_string*"){
+                    returnTypeString = true;
+                    returnTypeFinal = "const char*";
+                }
+                else returnTypeFinal = returnType;
+                returnCastFinal = (returnCast == "basic_string*")? "const char*" : returnCast;
                 if(returnType == className+"*"){
                     returnSelfType = true;
                     functionBody << namespaceStr << className << " obj = ";
                     functionBody << "reinterpret_cast<" << namespaceStr << className << "*>(self)->"
                                  << cmd->getNameAsString() << "(";
+                }
+                else if(returnTypeString){
+                    functionBody << "std::string returnStr = ";
+
+                    if (returnCast != "") {
+                        functionBody << "reinterpret_cast<" << returnTypeFinal << ">(";
+                        bodyEnd += ")";
+                    }
+
+                    //if Static call it properly
+                    if (cmd->isStatic())
+                        functionBody << namespaceStr << className << "::" << cmd->getNameAsString() << "(";
+                        //if not  use the passed object to call the method
+                    else
+                        functionBody << "reinterpret_cast<" << namespaceStr << className << "*>(self)->"
+                                     << cmd->getNameAsString() << "(";
+
+                    bodyEnd += ")";
                 }
                 else{
                     //should this function return?
@@ -149,7 +176,7 @@ public:
                         functionBody << "return ";
 
                     if (returnCast != "") {
-                        functionBody << "reinterpret_cast<" << returnType << ">(";
+                        functionBody << "reinterpret_cast<" << returnTypeFinal << ">(";
                         bodyEnd += ")";
                     }
 
@@ -169,7 +196,7 @@ public:
 
 
             std::stringstream funcname;
-            funcname << returnType << " " << className << methodName;
+            funcname << returnTypeFinal << " " << className << methodName;
 
             auto it = funcList.find(funcname.str());
 
@@ -186,11 +213,13 @@ public:
                 const QualType qt = cmd->parameters()[i]->getType();
 //                cout<<methodName<<" "<<qt.getAsString()<<endl;
                 std::tie(returnType, returnCast, isPointer, shouldReturn) = determineCType(qt);
+                returnCastFinal = (returnCast == "basic_string*")? "const char*" : returnCast;
+                returnTypeFinal = (returnType == "basic_string*")? "const char*" : returnType;
                 if(i == 0 && self.empty()){
-                    funcname << returnType << " ";
+                    funcname << returnTypeFinal << " ";
                 }
                 else {
-                    funcname << separator << returnType << " ";
+                    funcname << separator << returnTypeFinal << " ";
                 }
                 funcname << cmd->parameters()[i]->getQualifiedNameAsString() << "";
 
@@ -214,6 +243,13 @@ public:
                 functionBody << ");\n    ";
                 functionBody << "return reinterpret_cast<" << className << "*>(new "
                              << namespaceStr << className << "(obj))";
+            }
+            else if(returnTypeString){
+                functionBody << bodyEnd << "; \n";
+                bodyEnd = "";
+                functionBody << "    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));\n";
+                functionBody << "    strcpy(charPtr, returnStr.c_str());\n";
+                functionBody << "    return charPtr";
             }
 
             OS.HeaderOS << funcname.str() << ";\n";

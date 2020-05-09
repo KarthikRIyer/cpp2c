@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-RationalTime* RationalTime_create(double value, double rate){
+ RationalTime_create(double value, double rate){
     return reinterpret_cast<RationalTime*>( new opentime::RationalTime(value, rate)); 
 }
 _Bool RationalTime_is_invalid_time(RationalTime* self){
@@ -63,15 +63,24 @@ double RationalTime_to_seconds(RationalTime* self){
     return reinterpret_cast<opentime::RationalTime*>(self)->to_seconds(); 
 }
 const char* RationalTime_to_timecode(RationalTime* self, double rate,  drop_frame, ErrorStatus* error_status){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(rate, drop_frame, error_status)); 
+    std::string returnStr = reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(rate, drop_frame, error_status)); 
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr; 
 }
 const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(error_status)); 
+    std::string returnStr = reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(error_status)); 
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr; 
 }
 const char* RationalTime_to_time_string(RationalTime* self){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_time_string()); 
+    std::string returnStr = reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_time_string()); 
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr; 
 }
-void RationalTime_destroy(RationalTime* self){
+ RationalTime_destroy(RationalTime* self){
      delete reinterpret_cast<opentime::RationalTime*>(self); 
 }
 #ifdef __cplusplus
